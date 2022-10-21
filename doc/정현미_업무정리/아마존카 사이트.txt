@@ -1,0 +1,75 @@
+id/pw : develop11 / develop11
+
+
+아마존카 FMS  (아마존카 임직원 ERP)
+
+https://fms1.amazoncar.co.kr
+https://fms5.amazoncar.co.kr
+
+
+에이전트 FMS  (영업에이전트)
+
+https://fms5.amazoncar.co.kr/agent/index.jsp
+
+select user_nm, user_id, id, text_decrypt(user_psd, 'pw'), sa_code from users  where use_yn = 'Y' and dept_id='1000';
+
+
+협력업체 FMS
+
+https://fms5.amazoncar.co.kr/off_web2/index.jsp
+
+select user_nm, user_id, id, text_decrypt(user_psd, 'pw'), sa_code from users  where use_yn = 'Y' and dept_id='8888';
+
+
+긴급출동 FMS
+
+https://fms.amazoncar.co.kr/off_web/index.jsp
+
+
+보험관리 FMS
+
+https://fms.amazoncar.co.kr/off_web/index.jsp
+
+
+내부통제 
+
+http://fms1.amazoncar.co.kr/acct/index.jsp
+
+
+경매분석사이트
+
+http://auction.amazoncar.co.kr/auction/login/auction_login.do
+
+
+아마존카 홈페이지
+
+https://www.amazoncar.co.kr/
+
+
+고객 FMS
+
+https://client.amazoncar.co.kr/
+
+
+젠키스 소스배포
+
+http://211.174.180.113:8080
+
+
+SVN 서버
+
+http://211.174.180.113:81/!/#
+
+
+성능 모니터링 - Scouter
+
+
+서버 접근 - PuTTY
+
+
+FTP - FileZilla
+
+
+
+
+

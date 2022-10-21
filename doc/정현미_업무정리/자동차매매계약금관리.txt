@@ -1,0 +1,64 @@
+●계약금및보험료규정관리
+
+- 배달탁송료는 관리 안하기로. 반영안해도됨(총무팀장님 확인)
+
+- 제조사, 차명별 항목별 지급규정 정리분
+
+- 계약금 및 임시운행보험료 계약이나 사전계약에서 입력시 해당분 가져와서 디폴트 처리 및 고정
+
+- 변경이 있는 경우 이력 필요
+
+- 카드캐쉬백 등록(신규/변경)과 약정현황 하고 유사함.
+
+
+
+●구매대금지급내역(계약관리)
+
+- 계약관리 세부페이지 [자동차&보험] 에 반영되어 있음
+
+
+●자동차매매계약및계약금지급현황
+
+- 카드선택, 출금등록, 전표는 출금관리에서 처리함
+
+
+--자동차매매계약및계약금지급현황 (확정-계약출고기준)
+SELECT a.rent_mng_id, a.rent_l_cd, NVL(a.rpt_no,b.com_con_no) com_con_no, 
+       '대상/비대상' con_cont_st, --자동차매매대금계약금규정관리와 연동해서 규정등록분이면 대상, 아니면 비대상
+       DECODE(a.trf_st0,'1','계좌이체','3','카드',DECODE(a.con_amt,0,'','계좌이체')) trf_st0, 
+       DECODE(a.con_amt,0,'',a.con_est_dt) con_est_dt, a.con_amt, DECODE(a.con_amt,0,'',a.con_pay_dt) con_pay_dt
+FROM   car_pur a, car_pur_com b, cont c
+WHERE  a.rent_l_cd=b.rent_l_cd(+) AND a.rent_l_cd=c.rent_l_cd AND c.car_gu='1' 
+       AND c.rent_dt >= '20220801' 
+MINUS --사전계약중복분 제거
+SELECT b.rent_mng_id, b.rent_l_cd, a.com_con_no,
+       '대상/비대상' con_cont_st, --자동차매매대금계약금규정관리와 연동해서 규정등록분이면 대상, 아니면 비대상
+       DECODE(a.trf_st0,'1','계좌이체','3','카드',DECODE(a.con_amt,0,'','계좌이체')) trf_st0, 
+       DECODE(a.con_amt,0,'',a.con_est_dt) con_est_dt, a.con_amt, DECODE(a.con_amt,0,'',a.con_pay_dt) con_pay_dt
+FROM   car_pur_com_pre a, cont b
+WHERE  a.rent_l_cd=b.rent_l_cd
+;
+       
+--자동차매매계약및계약금지급현황 (예정-사전계약기준)
+SELECT '' rent_mng_id, '' rent_l_cd, a.com_con_no,
+       '대상/비대상' con_cont_st, --자동차매매대금계약금규정관리와 연동해서 규정등록분이면 대상, 아니면 비대상
+       DECODE(a.trf_st0,'1','계좌이체','3','카드',DECODE(a.con_amt,0,'','계좌이체')) trf_st0, 
+       DECODE(a.con_amt,0,'',a.con_est_dt) con_est_dt, a.con_amt, DECODE(a.con_amt,0,'',a.con_pay_dt) con_pay_dt
+FROM   car_pur_com_pre a, cont b
+WHERE  a.rent_l_cd=b.rent_l_cd(+)
+       AND TO_CHAR(a.reg_dt,'YYYYMM') >= '202208'     
+MINUS --계약중복분 제거          
+SELECT '' rent_mng_id, '' rent_l_cd, NVL(a.rpt_no,b.com_con_no) com_con_no, 
+       '대상/비대상' con_cont_st, --자동차매매대금계약금규정관리와 연동해서 규정등록분이면 대상, 아니면 비대상
+       DECODE(a.trf_st0,'1','계좌이체','3','카드',DECODE(a.con_amt,0,'','계좌이체')) trf_st0, 
+       DECODE(a.con_amt,0,'',a.con_est_dt) con_est_dt, a.con_amt, DECODE(a.con_amt,0,'',a.con_pay_dt) con_pay_dt
+FROM   car_pur a, car_pur_com b, cont c
+WHERE  a.rent_l_cd=b.rent_l_cd(+) AND a.rent_l_cd=c.rent_l_cd AND c.car_gu='1' 
+        
+        
+●출고및해지(계약금관리)
+
+- 계출번호가 계약번호 하나가 아니고, 변동 가능하기때문에 계약이 출고전해지 했다고 환불하지는 않음
+
+- 최종 계출이 취소가 되어야 환불처리 될듯
+

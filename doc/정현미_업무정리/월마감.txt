@@ -1,0 +1,561 @@
+[업무순서]
+자동처리
+->마감완료작업
+->엑셀파일만들기
+->\\비스타\공유폴더\총무부-2022년 월마감 (1)~(8)파일 놓기
+->이준석대리한테 월마감 완료알림는 메시지 발송 (이준석씨 차입금사환스케줄외 마감관련 나머지 업무처리)
+->함윤원과장한테 전체파일 메신저로 보냄 (스트레스테스트외 자료준비용)
+->김민수,김지윤씨한테 (7)만기도래계약현황 파일 보냄
+
+
+---------------------------------------------------------------
+
+● 자동처리(예약) : 매달 말일에 한번만 처리
+
+1. P_STAT_RENT_MON_MAGAM - 월마감  (예약->자동처리)   insert stat_rent_month
+
+---------------------------------------------------------------
+
+● 자동처리(예약) : 익월 11일 2시까지 (11일2시전 마감이 되었다면 P_STAT_RENT_MON_MAGAM_SHAMT에 미처리조건에 날짜 추가할것) 중복처리
+
+2. P_ESTI_REG_SH_OFFLS_ALL_CAR - 경매낙찰가견적 (확인)
+
+3. P_STAT_RENT_MON_MAGAM_SHAMT - 자산,장부가,경매낙찰가현황 : P_ESTI_REG_SH_OFFLS_ALL_CAR_RE - 경매낙찰가미견적분처리, UPDATE stat_rent_month
+
+---------------------------------------------------------------
+
+● 매월 11일경 총무팀 자산마감 완료후 마감완료작업
+
+--(0) 차량별자산현황 마감확인 cnt=0 이여야 조건충족
+
+SELECT COUNT(0) cnt
+  FROM stat_rent_month a, 
+       car_reg b 
+ WHERE a.save_dt=:save_dt
+       AND a.car_mng_id=b.car_mng_id 
+       AND a.prepare NOT IN ('4','5')
+       AND b.init_reg_dt LIKE substr(:save_dt,1,6)||'%'
+       AND a.dep_amt = 0 ;   --장부가 상각누계금액 확인 (미등록분 확인)
+
+
+** 부채 할부스케줄 입력 확인(이준석)
+
+** 부채 할부스케줄 상환일자 미입력 확인
+
+SELECT b.car_no, COUNT(0) no_cnt FROM scd_alt_case a, car_reg b WHERE a.alt_est_dt IS NULL AND a.car_mng_id=b.car_mng_id GROUP BY b.car_no;
+SELECT b.car_no, COUNT(0) no_cnt FROM scd_alt_etc a, car_reg b WHERE a.alt_est_dt IS NULL AND a.car_mng_id=b.car_mng_id GROUP BY b.car_no ;  
+
+SELECT * FROM scd_alt_case WHERE alt_est_dt IS NULL
+--delete FROM scd_alt_case WHERE alt_est_dt IS NULL
+
+** 부채현황 확인 및 재마감 P_DEBT_MAGAM
+
+   경영정보-재무회계-부채현황 마감일자(예:20220930) 부채현황의 차월이월차입금액 합계와
+                              최종마감일(전일자)    부채현황의 전월이월차입금액 합계 금액 일치 확인. 
+
+   금액일치인 경우 재마감 필요치 않으나 대부분 안맞아서 재마감처리함.
+
+   프로시저 실행
+ 
+DECLARE
+  V_DAY VARCHAR2(200);
+  V_USER_ID VARCHAR2(200);
+  R_CHK VARCHAR2(200);
+BEGIN
+  V_DAY := '20220930';   --재마감일자
+  V_USER_ID := '000063'; --마감처리자
+
+  P_DEBT_MAGAM(
+    V_DAY => V_DAY,
+    V_USER_ID => V_USER_ID,
+    R_CHK => R_CHK
+  );
+  :R_CHK := R_CHK;
+END;
+
+
+** 자산입력 확인(총무팀윤보람)
+** 자산금액 확인(차영화부장)
+
+-> 변경분있으면 다시함 
+
+   P_STAT_RENT_MON_MAGAM_SHAMT - 자산,장부가,경매낙찰가현황 : P_ESTI_REG_SH_OFFLS_ALL_CAR_RE - 경매낙찰가미견적분처리, UPDATE stat_rent_month
+
+
+---------------------------------------------------------------
+
+
+● 프로시저 실행 시작
+
+
+4. P_STAT_RENT_MON_MAGAM_CLSEST  - 신규영업중단현재가치(자산,부채현황)
+
+5. P_STAT_RENT_MON_MAGAM_SUIDT - 매각예정일 처리
+
+7. P_STAT_RENT_MON_MAGAM_CASHFLOW  - 계약별 cashflow 현황 - 매각분 제외
+
+8. P_STAT_RENT_MON_MAGAM_CASHCOST  - 계약별 cashflow 현황 - 매각분 비용만
+
+9. P_STAT_RENT_MON_MAGAM_BOOK - 장부가액
+
+---------------------------------------------------------------
+
+스트레스 테스트
+
+1. P_STAT_RENT_S_TEST_MAGAM
+
+---------------------------------------------------------------
+
+만기도래계약현황
+
+1. P_STAT_RENT_END_MAGAM
+
+   P_ESTI_REG_SH_OFFLS_END_CAR  : P_STAT_RENT_END_MAGAM에서 처리
+
+   P_STAT_RENT_END_MAGAM_ETC  : P_STAT_RENT_END_MAGAM에서 처리
+
+---------------------------------------------------------------
+
+중고차평가이익 재계산 및 검증
+
+1. P_STAT_SH_EVAL
+
+
+---------------------------------------------------------------
+
+
+● DB 쿼리 조회해서 엑셀파일 생성 
+
+
+--(1) 차량별자산현황
+
+SELECT b.car_no, 
+       b.init_reg_dt, 
+       a.car_b_amt, 
+       a.car_c_amt, 
+       a.car_amt, 
+       a.dep_amt, 
+       a.book_amt, 
+       a.book_per, 
+       a.sh_amt, 
+       a.sh_per, 
+       a.grt_amt_s, 
+       a.fee_est_amt 
+  FROM stat_rent_month a, 
+       car_reg b 
+ WHERE a.save_dt=:save_dt
+       AND a.car_mng_id=b.car_mng_id 
+       AND a.prepare NOT IN ('4','5') 
+ORDER BY b.init_reg_dt;
+
+
+
+--(2) 신규영업 중단하고 대여사업 계속시(현재가치) 차량별세부리스트 Excel - 외부제출용 (현재가치 대수에 맞춤)
+
+SELECT NVL(d.nm,'비차입') nm, 
+       b.car_no, 
+       b.init_reg_dt, 
+       b.car_nm, 
+       h.jg_g_7, 
+       h.jg_a, 
+       c.firm_nm, 
+       DECODE(a.fee_rent_st,'1',DECODE(a.car_gu,'1','신차','0','재리스','2','중고차','3','월렌트'),'연장') rent_st, 
+       DECODE(a.car_st,'1','렌트','2','보유차','3','리스','4','월렌트','5','업무대여') car_st, 
+       DECODE(a.car_use,'1','영업용','자가용') car_use, 
+       DECODE(a.rent_way,'1','일반식','기본식') rent_way, 
+       a.b_car_mon, 
+       a.b_end_mon, 
+       a.rent_start_dt, 
+       a.rent_end_dt, 
+       a.n_mon, 
+       a.n_day, 
+       a.n_mon+(a.n_day/30) n_monday, 
+       a.d_grt_amt AS d_grt_amt, --보증금 
+       a.d_grt_amt2 AS d_grt_amt2, --보증금현재가치 
+       a.d_pp_amt AS d_pp_amt, --잔여선납금
+       a.d_ifee_amt AS d_ifee_amt, --잔여개시대여료
+       a.b_opt_amt, --만기시잔가 
+       a.a_car_amt AS a_car_amt, --만기시잔가현재가치 
+       a.a_car_amt2 AS a_car_amt2, --차량현재잔가 
+       a.a_fee_amt_2 AS a_fee_amt_2, --대여료현재가치(대여료+선수금효과) 
+       a.a_fee_amt_1 AS a_fee_amt_1, --대여료현재가치(대여료) 
+       a.a_dly_amt AS a_dly_amt, --미수대여료 
+       -1*a.a_pay_amt AS a_pay_amt, --비용현재가치 
+       a.a_cls_amt AS a_cls_amt, --위약금 
+       a.a_fee_amt, 
+       a.a_tax_amt2, 
+       a.a_ins_amt, 
+       a.a_tax_amt, 
+       a.a_serv_amt, 
+       a.a_maint_amt, 
+       a.a_grt_eff_amt, 
+       a.a_pp_eff_amt, 
+       a.a_ifee_eff_amt, 
+       '' gong, 
+       a.b_fee_amt, 
+       a.b_ins_amt, 
+       a.b_tax_amt, 
+       a.b_serv_amt, 
+       a.b_maint_amt, 
+       a.b_cls_per, 
+       a.a_g, 
+       a.o_maint_amt --견적점검용  
+  FROM stat_rent_month a, 
+       car_reg b, 
+       client c, 
+       (SELECT * 
+         FROM code 
+        WHERE c_st='0003'
+       ) d, 
+       ESTIMATE e, 
+       esti_exam f, 
+       car_nm g, 
+       esti_jg_var h,
+       car_pur i 
+ WHERE a.save_dt=:save_dt
+       AND a.car_mng_id=b.car_mng_id
+       AND a.prepare NOT IN ('4','5') 
+       AND a.client_id=c.client_id 
+       AND a.cpt_cd=d.code(+) 
+       AND a.est_id=e.est_id 
+       AND a.est_id=f.est_id 
+       AND e.car_id=g.car_id 
+       AND e.car_seq=g.car_seq 
+       AND g.jg_code=h.sh_code 
+       AND f.jg_b_dt=h.reg_dt 
+       AND a.rent_mng_id=i.rent_mng_id AND a.rent_l_cd=i.rent_l_cd
+ORDER BY d.etc, 
+       a.cpt_cd, 
+       a.rent_start_dt;
+
+
+
+--(3) 신규영업 중단하고 대여사업 계속시(현재가치) 차량별세부리스트 Excel - 내부점검용 (CASH FLOW 대수에 맞춤)
+
+SELECT NVL(d.nm,'비차입') nm, 
+       b.car_no, 
+       b.init_reg_dt, 
+       NVL(b.car_nm,o.car_nm) car_nm, 
+       h.jg_g_7, 
+       h.jg_a, 
+       c.firm_nm, 
+       DECODE(a.fee_rent_st,'1',DECODE(a.car_gu,'1','신차','0','재리스','2','중고차','3','월렌트'),'연장') rent_st, 
+       DECODE(a.car_st,'1','렌트','2','보유차','3','리스','4','월렌트','5','업무대여') car_st, 
+       DECODE(a.car_use,'1','영업용','자가용') car_use, 
+       DECODE(a.rent_way,'1','일반식','기본식') rent_way, 
+       a.b_car_mon, 
+       a.b_end_mon, 
+       a.rent_start_dt, 
+       a.rent_end_dt, 
+       a.n_mon, 
+       a.n_day, 
+       a.n_mon+(a.n_day/30) n_monday, 
+       a.d_grt_amt AS d_grt_amt, --보증금 
+       a.d_grt_amt2 AS d_grt_amt2, --보증금현재가치 
+       a.d_pp_amt AS d_pp_amt, --잔여선납금
+       a.d_ifee_amt AS d_ifee_amt, --잔여개시대여료
+       a.b_opt_amt, --만기시잔가 
+       a.a_car_amt AS a_car_amt, --만기시잔가현재가치 
+       a.a_car_amt2 AS a_car_amt2, --차량현재잔가 
+       a.a_fee_amt_2 AS a_fee_amt_2, --대여료현재가치(대여료+선수금효과) 
+       a.a_fee_amt_1 AS a_fee_amt_1, --대여료현재가치(대여료) 
+       a.a_dly_amt AS a_dly_amt, --미수대여료 
+       -1*a.a_pay_amt AS a_pay_amt, --비용현재가치 
+       a.a_cls_amt AS a_cls_amt, --위약금 
+       a.a_fee_amt, 
+       a.a_tax_amt2, 
+       a.a_ins_amt, 
+       a.a_tax_amt, 
+       a.a_serv_amt, 
+       a.a_maint_amt, 
+       a.a_grt_eff_amt, 
+       a.a_pp_eff_amt, 
+       a.a_ifee_eff_amt, 
+       '' gong, 
+       a.b_fee_amt, 
+       a.b_ins_amt, 
+       a.b_tax_amt, 
+       a.b_serv_amt, 
+       a.b_maint_amt, 
+       a.b_cls_per, 
+       a.a_g, 
+       a.o_maint_amt, --견적점검용  
+       '' gong2, 
+       e.reg_dt, 
+       e.rent_dt, 
+       e.car_amt, 
+       e.opt_amt, 
+       e.col_amt, 
+       e.tax_dc_amt, 
+       h.sh_code, 
+       b.init_reg_dt, 
+       e.today_dist, 
+       e.accid_serv_amt1, 
+       e.accid_serv_amt2, 
+       e.jg_opt_st, 
+       e.jg_col_st 
+  FROM stat_rent_month a, 
+       car_reg b, 
+       client c, 
+       (SELECT * 
+         FROM code 
+        WHERE c_st='0003'
+       ) d, 
+       ESTIMATE e, 
+       esti_exam f, 
+       car_nm g, car_mng o,
+       esti_jg_var h,
+       car_pur i,
+       (select rent_l_cd from stat_rent_month_cash where save_dt=:save_dt group by rent_l_cd) j  
+ WHERE a.save_dt=:save_dt
+       AND a.car_mng_id=b.car_mng_id(+) 
+       AND a.prepare NOT IN ('4','5') 
+       AND a.client_id=c.client_id 
+       AND a.cpt_cd=d.code(+) 
+       AND a.est_id=e.est_id 
+       AND a.est_id=f.est_id 
+       AND e.car_id=g.car_id 
+       AND e.car_seq=g.car_seq 
+       AND g.car_comp_id=o.car_comp_id AND g.car_cd=o.code
+       AND g.jg_code=h.sh_code 
+       AND f.jg_b_dt=h.reg_dt 
+       AND a.rent_mng_id=i.rent_mng_id AND a.rent_l_cd=i.rent_l_cd
+       and a.rent_l_cd=j.rent_l_cd
+ORDER BY d.etc, 
+       a.cpt_cd, 
+       a.rent_start_dt;
+
+
+
+--(4) 신규영업 중단하고 대여사업 계속시 CASH FLOW(개별차량) Excel 
+
+SELECT NVL(d.car_no,a.rent_l_cd) car_no, 
+       c.nm, 
+       a.cash_ym, 
+       DECODE(a.debt_st,'1',1,0) debt_st1, 
+       DECODE(a.debt_st,'2',1,0) debt_st2, 
+       DECODE(a.debt_st,'0',1,0) debt_st3, 
+       DECODE(a.debt_st,'1',1,0)+DECODE(a.debt_st,'2',1,0)+DECODE(a.debt_st,'0',1,0) cnt, 
+       0 d_amt, 
+       0 c_amt, 
+       a.m_fee_amt, 
+       a.m_sui_amt, 
+       (a.m_fee_amt+a.m_sui_amt) a_amt, 
+       0 gong3, 
+       a.m_grt_amt, 
+       (0+a.m_grt_amt) e_amt, 
+       a.m_tax_amt2 AS f_amt, 
+       a.m_tax_amt, 
+       a.m_ins_amt, 
+       a.m_ins_amt2, 
+       a.m_serv_amt, 
+       a.m_maint_amt, 
+       (a.m_tax_amt+a.m_ins_amt+a.m_ins_amt2+a.m_serv_amt+a.m_maint_amt) g_amt, 
+       0 gong4, 
+       (0+a.m_grt_amt+a.m_tax_amt2+a.m_tax_amt+a.m_ins_amt+a.m_ins_amt2+a.m_serv_amt+a.m_maint_amt) b_amt 
+  FROM stat_rent_month_cash a, 
+       stat_rent_month b, 
+       (SELECT * 
+         FROM code 
+        WHERE c_st='0003'
+       ) c, 
+       car_reg d 
+ WHERE a.save_dt=:save_dt 
+       AND a.save_dt=b.save_dt 
+       AND a.rent_l_cd=b.rent_l_cd 
+       AND b.prepare NOT IN ('4','5') 
+       AND b.cpt_cd=c.code(+) 
+       AND b.car_mng_id=d.car_mng_id(+) 
+ORDER BY c.etc, 
+       b.cpt_cd, 
+       b.rent_start_dt, 
+       a.rent_l_cd, 
+       a.cash_ym;
+
+
+
+--(5) 신규영업 중단하고 대여사업 계속시 CASH FLOW(검산) Excel 
+
+SELECT NVL(d.nm,'비차입') nm, 
+       nvl(b.car_no,a.rent_l_cd) car_no, 
+       b.init_reg_dt, 
+       substr(b.init_reg_dt,1,4)||'-'||substr(b.init_reg_dt,5,2)||'-'||substr(b.init_reg_dt,7,2) as ins_reg_dt2,    --스트레스테스트 추가
+       b.car_nm, 
+       c.firm_nm, 
+       DECODE(a.fee_rent_st,'1',DECODE(a.car_gu,'1','신차','0','재리스','2','중고차','3','월렌트'),'연장') rent_st, 
+       DECODE(a.car_st,'1','렌트','2','보유차','3','리스','4','월렌트','5','업무대여') car_st, 
+       DECODE(a.car_use,'1','영업용','자가용') car_use, 
+       DECODE(a.rent_way,'1','일반식','기본식') rent_way, 
+       a.b_car_mon, 
+       a.b_end_mon,         
+       a.rent_start_dt, 
+       a.rent_end_dt, 
+       NVL(a.sui_est_dt2,a.sui_est_dt) sui_est_dt,
+       substr(NVL(a.sui_est_dt2,a.sui_est_dt),1,4)||'-'||substr(NVL(a.sui_est_dt2,a.sui_est_dt),5,2)||'-'||substr(NVL(a.sui_est_dt2,a.sui_est_dt),7,2) as sui_est_dt2,    --스트레스테스트 추가
+       decode(a.car_mng_id,'',0,trunc(to_number(to_date(NVL(a.sui_est_dt2,a.sui_est_dt),'YYYYMMDD')-to_date(b.init_reg_dt,'YYYYMMDD'))/365*12,9)) AS fw917, 
+       ((TO_NUMBER(TO_CHAR(TO_DATE(NVL(a.sui_est_dt2,a.sui_est_dt),'YYYYMMDD')+1,'YYYY'))-TO_NUMBER(TO_CHAR(TO_DATE(b.init_reg_dt,'YYYYMMDD')+1,'YYYY')))*12)
+       +(TO_NUMBER(TO_CHAR(TO_DATE(NVL(a.sui_est_dt2,a.sui_est_dt),'YYYYMMDD')+1,'MM'))-TO_NUMBER(TO_CHAR(TO_DATE(b.init_reg_dt,'YYYYMMDD')+1,'MM'))) cls_mon,   --스트레스테스트 추가
+       a.n_mon, 
+       a.n_day, 
+       CASE WHEN a.n_day >0 THEN  a.n_mon+(a.n_day/30) ELSE a.n_mon END n_monday, 
+       a.d_grt_amt AS d_grt_amt, --보증금  
+       i.m_fee_amt, --잔여대여료합계 
+       i.m_ins_amt, --잔여보험료합계 
+       i.m_tax_amt, --잔여자동차세합계 
+       i.m_serv_amt, --잔여일반식정비비합계 
+       i.m_maint_amt, --잔여검사비 합계  
+       i.m_sui_amt,  --매각예정금액
+       i.m_book_amt, --매각예정기준장부가예정금액
+       CASE WHEN i.m_sui_amt >0 THEN (i.m_book_amt/i.m_sui_amt)*100 ELSE 0 end book_per, --장부가대비
+       i.m_dep_amt, --상각누계예상가
+       a.car_amt,  --취득가
+       a.dep_amt,  --상각액
+       a.book_amt, --장부가
+
+       a.a_dly_amt AS a_dly_amt, --미수대여료 
+       a.a_tax_amt2, --개소세환입액(6개월내) 
+       a.a_ins_amt, --보험료 
+       a.a_tax_amt, --자동차세 
+       a.a_serv_amt, --일반식정비비 
+       a.a_maint_amt, --자동차검사비  
+       '' gong, 
+       a.b_fee_amt, --기준월대여료 
+       a.b_ins_amt, --기준월보험료 
+       a.b_tax_amt, --기준월자동차세 
+       a.b_serv_amt, --기준월일반식정비비 
+       a.b_maint_amt, --월자동차검사비 
+       a.a_g, --10만원당할부금 
+       a.o_maint_amt, --잔여검사비
+       e1.reg_dt, e1.rent_dt, e1.today_dist, e1.o_1,          
+       e2.reg_dt, e2.rent_dt, e2.today_dist, e2.o_1, e2.ro_13_amt, e2.a_b, 
+       a.jg_code, e2.car_amt, e2.opt_amt, e2.col_amt, e2.tax_dc_amt, e2.accid_serv_amt1, e2.accid_serv_amt2, 
+       e2.jg_opt_st, e2.jg_col_st 
+  FROM stat_rent_month a, 
+       car_reg b, 
+       client c, 
+       (SELECT * 
+         FROM code 
+        WHERE c_st='0003'
+       ) d, 
+       (SELECT rent_l_cd, 
+              SUM(m_fee_amt) m_fee_amt, 
+              SUM(m_ins_amt) m_ins_amt, 
+              SUM(m_tax_amt) m_tax_amt, 
+              SUM(m_serv_amt) m_serv_amt, 
+              SUM(m_maint_amt) m_maint_amt, 
+              SUM(m_sui_amt) m_sui_amt,  
+              SUM(m_book_amt) m_book_amt,  
+              SUM(m_dep_amt) m_dep_amt    
+         FROM stat_rent_month_cash 
+        WHERE save_dt=:save_dt 
+        GROUP BY rent_l_cd
+       ) i,
+       estimate e1, estimate e2,
+       car_pur i2,
+       (select rent_l_cd from stat_rent_month_cash where save_dt=:save_dt group by rent_l_cd) j   
+ WHERE a.save_dt=:save_dt 
+       AND a.car_mng_id=b.car_mng_id(+) 
+       AND a.prepare NOT IN ('4','5') 
+       AND a.client_id=c.client_id 
+       AND a.cpt_cd=d.code(+) 
+       AND a.rent_l_cd=i.rent_l_cd(+)
+       AND a.EST_ID=e1.est_id(+)
+       AND a.est_id2=e2.est_id(+) 
+       AND a.rent_mng_id=i2.rent_mng_id AND a.rent_l_cd=i2.rent_l_cd
+       and a.rent_l_cd=j.rent_l_cd
+ORDER BY d.etc, 
+       a.cpt_cd, 
+       a.rent_start_dt, 
+       a.rent_l_cd 
+;
+
+
+
+--(6)신규영업 중단하고 대여사업 계속시 CASH FLOW(종합)
+
+FMS운영관리 > Admin > 마감관리에서 * DB 월마감 보기 -  해당마감일시 - 선택중 
+
+			<option value="19">신규영업 중단하고 대여사업 계속시 CASH FLOW(종합,백만원단위)</option>			
+			<option value="20">신규영업 중단하고 대여사업 계속시 CASH FLOW(종합,원단위)</option>
+
+선택하고 조회버튼 클릭해서 나오는 화면 카피해서 엑셀파일에 붙임
+
+
+
+--(7) 만기도래 계약 경매예측 점검 - 마감분
+
+SELECT 
+       A.CAR_NO, A.JG_CODE, A.RENT_L_CD, A.RENT_START_DT, A.RENT_END_DT,
+       A.CAR_Y_FORM, A.COLO, A.DPM, A.DIESEL, A.AUTO_YN,
+       A.CAR_ST, A.CAR_GU, A.F_CON_MON, A.T_CON_MON, A.AGREE_DIST, 
+       A.CAR_NM, A.CAR_NAME, A.OPT, A.INIT_REG_DT, A.CAR_AMT,
+       A.TOT_AMT, A.MAX_JA, A.JA_AMT, A.OPT_AMT, A.R_JA_AMT,       
+       A.OVER_BAS_KM, A.TOT_DIST, A.SH_KM, A.CLS_DIST, A.R_OVER_AMT,
+       A.CONT_DT, A.MM_PR, A.TODAY_DIST, A.O_1, A.CLS_ST, A.CLS_DT,
+       f.migr_dt,
+       A.RENT_DT, A.MATCH, A.O_A, A.O_B, A.O_D, A.SH_A_M_3,
+       A.O_R, A.O_R_R, A.O_E, A.A_M_3, A.B_AGREE_DIST,
+       A.JG_14, A.JG_G_13, A.JG_G_18, A.JG_5_1, A.JG_G_5, A.EST_DC_AMT,
+       DECODE(b.rent_way,'1','일반식','기본식') rent_way,
+       c.over_run_amt, b.fee_s_amt, 
+       e.car_num, a.fee_rent_st,
+       d1.con_mon, d1.fee_s_amt,
+       d2.con_mon, d2.fee_s_amt,
+       d3.con_mon, d3.fee_s_amt,
+       d4.con_mon, d4.fee_s_amt,
+       d5.con_mon, d5.fee_s_amt,
+       d6.con_mon, d6.fee_s_amt,
+       d7.con_mon, d7.fee_s_amt,
+       d8.con_mon, d8.fee_s_amt,
+       d9.con_mon, d9.fee_s_amt,
+       d10.con_mon, d10.fee_s_amt       
+  FROM STAT_RENT_END_MONTH A, fee b, fee_etc c, 
+       fee d1, fee d2, fee d3, fee d4, fee d5, fee d6, fee d7, fee d8, fee d9, fee d10,
+       car_reg e, sui f    
+  where A.end_ym=:end_ym
+  AND a.rent_mng_id=b.rent_mng_id AND a.rent_l_cd=b.rent_l_cd AND a.fee_rent_st=b.rent_st
+  AND a.rent_mng_id=c.rent_mng_id AND a.rent_l_cd=c.rent_l_cd AND a.fee_rent_st=c.rent_st
+  AND a.rent_mng_id=d1.rent_mng_id(+) AND a.rent_l_cd=d1.rent_l_cd(+) AND '1'=d1.rent_st(+)
+  AND a.rent_mng_id=d2.rent_mng_id(+) AND a.rent_l_cd=d2.rent_l_cd(+) AND '2'=d2.rent_st(+)
+  AND a.rent_mng_id=d3.rent_mng_id(+) AND a.rent_l_cd=d3.rent_l_cd(+) AND '3'=d3.rent_st(+)
+  AND a.rent_mng_id=d4.rent_mng_id(+) AND a.rent_l_cd=d4.rent_l_cd(+) AND '4'=d4.rent_st(+)
+  AND a.rent_mng_id=d5.rent_mng_id(+) AND a.rent_l_cd=d5.rent_l_cd(+) AND '5'=d5.rent_st(+)
+  AND a.rent_mng_id=d6.rent_mng_id(+) AND a.rent_l_cd=d6.rent_l_cd(+) AND '6'=d6.rent_st(+)
+  AND a.rent_mng_id=d7.rent_mng_id(+) AND a.rent_l_cd=d7.rent_l_cd(+) AND '7'=d7.rent_st(+)
+  AND a.rent_mng_id=d8.rent_mng_id(+) AND a.rent_l_cd=d8.rent_l_cd(+) AND '8'=d8.rent_st(+)
+  AND a.rent_mng_id=d9.rent_mng_id(+) AND a.rent_l_cd=d9.rent_l_cd(+) AND '9'=d9.rent_st(+)
+  AND a.rent_mng_id=d10.rent_mng_id(+) AND a.rent_l_cd=d10.rent_l_cd(+) AND '10'=d10.rent_st(+)
+  AND A.car_mng_id=e.car_mng_id 
+  AND A.car_mng_id=f.car_mng_id(+) 
+order by 5,1;
+
+
+
+--(8) 중고차평가이익 재계산
+
+SELECT A.RENT_STAT1, A.RENT_CLASS1, A.RENT_START_DT1, A.RENT_L_CD1,
+       b.car_num, b.car_no, c.jg_code, c.car_name, d.nm,
+       A.CON_MON1, b.init_reg_dt, A.CAR_AMT,A.SH_CAR_AMT, A.MM_PR, A.SH_AMT, A.EVAL_CAR_AMT,
+       A.RENT_STAT2, A.CLS_ST, A.CLS_DT, A.CLS_JAN_AMT, A.RENT_END_DT2, A.FEE_OPT_AMT, A.JA_S_AMT, A.USE_E_DT, A.J_OVER_AMT,
+       A.CNG_AMT1, A.CNG_AMT2, A.GAM_MON1,       
+       A.CHA_MON1, A.GAM_PER1, A.GAM_AMT1, A.GAM_MON2,
+       A.CHA_MON2, A.GAM_PER2, A.GAM_AMT2, A.CNG_AMT3, A.CNG_AMT4,
+       DECODE(A.CLS_ST,'1',A.CNG_AMT3,A.CNG_AMT4) CHK_AMT1,
+       A.EVAL_CAR_AMT-DECODE(A.CLS_ST,'1',A.CNG_AMT3,A.CNG_AMT4) CHK_AMT2,
+       CASE when A.RENT_STAT1 = '수의계약' THEN '폐차-수의매각'
+            when A.RENT_STAT1 = '폐차' THEN '폐차-수의매각'
+            WHEN A.RENT_STAT1 = '신차연장' AND A.FEE_OPT_AMT > 0 THEN '매입옵션-연장'
+            WHEN A.RENT_STAT1 = '재리스연장' AND A.FEE_OPT_AMT > 0 THEN '매입옵션-연장'
+            ELSE '' 
+       END CHK_ST1 
+  FROM STAT_SH_EVAL A, car_reg b, sh_base c, (SELECT * FROM code WHERE c_st='0039' AND code<>'0000') d, cont e
+  WHERE a.save_dt=:p_save_dt AND a.car_mng_id=b.car_mng_id AND a.car_mng_id=c.car_mng_id AND b.Fuel_kd=d.nm_cd
+  AND a.rent_l_cd1=e.rent_l_cd 
+  --직전3개월 대여개시분
+  AND A.RENT_START_DT1 BETWEEN TO_CHAR(ADD_MONTHS(TO_DATE(a.save_dt,'YYYYMMDD'),-3)+1,'YYYYMMDD') AND a.save_dt 
+  --신차(업무대여,인수거부)계약이고 직전계약이 없는거는 제외
+  AND CASE WHEN a.rent_stat1='신차' AND a.rent_l_cd2 IS NULL THEN 'N' WHEN a.rent_stat1='신차' AND e.reject_car='Y' THEN 'N' WHEN a.rent_stat1='업무대여' AND a.rent_st1='1' AND a.rent_l_cd2 IS NULL THEN 'N' ELSE 'Y' END ='Y' 
+  --매입옵션제외
+  AND a.rent_stat1<>'매입옵션'   
+  ORDER BY A.RENT_START_DT1 
+; 

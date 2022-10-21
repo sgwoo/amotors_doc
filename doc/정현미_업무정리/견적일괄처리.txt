@@ -1,0 +1,62 @@
+
+● 신차 주요차종 일괄 견적하기
+
+  - 매월초에 차종관리 담당자(고연미차장)가 국산차 DC금액 입력 및 차종 추가입력후에 요청하면 처리
+
+  - P_ESTI_REG_HP_RES 프로시저 실행, 2시간반에서 3시간 소요  
+
+  - 처리완료후 요청자한테 전달하면 요청자가 견적 결과 검증 확인 후 홈페이지적용 처리함.
+
+  - P_ESTI_REG_HP_RES
+
+     1) ESTIMATE_HP 40일전 견적건 삭제하여 정리 (누적되어 양이 많아져서 정리함)
+     2) P_ESTI_REG_HP(P_EST_TEL, P_SET_CODE, 20000); 한건당 약정운행거리별 6건 호출
+        (20000,30000,40000,10000,15000,25000)
+     3) P_ESTI_REG_HP 
+          * estimate_hp 테이블 insert 
+          * 프로시저 호출
+              P_ESTI_JANGA (P_REG_CODE, P_JG_B_DT, P_EM_A_J, P_EA_A_J, 'P_HP');
+	      P_ESTI_FEEAMT(P_REG_CODE, P_JG_B_DT, P_EM_A_J, P_EA_A_J, 'P_HP');
+	      P_ESTI_CLSPER(P_REG_CODE, P_JG_B_DT, P_EM_A_J, P_EA_A_J, 'P_HP');
+
+  - 한건씩 처리하는 것은 P_ESTI_REG_HP2 
+
+
+● 재리스차량 일괄 견적하기
+
+  - 매일 새벽에 재리스 일괄 견적 프로시저 실행됨
+
+  - 그외에 변수변경 및 재견적 필요시 견적담당자(권용식차장)이 요청함
+
+  - P_ESTI_REG_SH2 프로시저 실행  
+
+    쿼리문중 (1) 주석처리하고 (2) 주석해제해서 실행, 실행완료후 원복해야 다음견적 제대로 돌림.
+
+    --(1)재리스 견적 당일등록분 제외                   
+    AND c.car_mng_id IS NULL        
+
+    --(2)재리스만 재견적
+    --AND nvl(b.secondhand,'0')='1' AND a.car_st='2'
+
+  - 홈페이지업로드 P_ESTI_SH_UPLOAD 호출되어 별도 적용처리 없음.
+
+  - P_ESTI_REG_SH2
+
+     1) secondhand 40일전 견적건 삭제하여 정리 (누적되어 양이 많아져서 정리함)
+     2) secondhand seq 정리, 3자리수 넘기지 않게 정리
+     2) P_ESTI_REG_SH(P_CAR_MNG_ID, P_SET_CODE, 10000); 한건당 약정운행거리별 4건 호출
+        (10000,20000,30000,40000)
+     3) P_ESTI_REG_SH 
+          * P_ESTI_SH_BASE(to_char(sysdate,'YYYYMMDD'), P_CAR_MNG_ID, 'SYSTEM'); 차량정보 갱신(프로시저 호출)
+          * estimate_sh 테이블 insert 
+          * 프로시저 호출
+              P_ESTI_SH_CAR_AMT(P_REG_CODE, P_JG_B_DT, P_EM_A_J, P_EA_A_J);
+              P_ESTI_SH_FEEAMT(P_REG_CODE, P_JG_B_DT, P_EM_A_J, P_EA_A_J);
+              P_ESTI_SH_UPLOAD(P_REG_CODE, P_JG_B_DT, P_EM_A_J, P_EA_A_J, V_SET_CODE, V_AGREE_DIST);
+
+  - 한건씩 처리하는 것은 P_ESTI_REG_SH2 
+
+
+● 업무지원차량대여료, 보유차사고대차대여료 매월초 자동 일괄 견적
+
+

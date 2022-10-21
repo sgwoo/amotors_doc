@@ -1,0 +1,79 @@
+<html>
+<head>
+<title>cbtkorea news</title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<style type="text/css">
+<!--
+.unnamed1 {  font-family: "굴림", "굴림체"; font-size: 12px; line-height: 21px; color: #FFFFFF}
+.unnamed2 {  font-size: 9pt; line-height: 21px; color: #666666}
+-->
+</style>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" link="#0033CC" vlink="#0000CC" alink="#0000CC">
+<table width="550" border="0" cellspacing="0" cellpadding="0" height="400">
+  <tr>
+    <td valign="top" align="center"> <br>
+      <table width="530" border="0" cellspacing="0" cellpadding="0">
+        <tr> 
+          <td background="../img/news_logo.gif" height="50" valign="middle" align="center" bgcolor="#EFFEF7"> 
+            <table width="530" border="0" cellspacing="0" cellpadding="0" height="22">
+              <tr> 
+                <td width="80"></td>
+                <td width="400" valign="middle" align="center" class="unnamed1"><b><font color="#006600">테스트 창이 안뜨는 경우 팝업차단해제를
+                  </font></b></td>
+                <td width="50"></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      
+      <table width="530" border="0" cellspacing="0" cellpadding="0" height="10">
+        <tr>
+          <td></td>
+        </tr>
+      </table>
+      <table width="530" border="0" cellspacing="0" cellpadding="0">
+        <tr> 
+          <td bgcolor="#A5E4E1" valign="middle" align="right"> 
+            <table width="480" border="0" cellspacing="0" cellpadding="0" bgcolor="#EFFEF7" class="unnamed2">
+              <tr> 
+                <td width="10" rowspan="2"> </td>
+                <td colspan="2"><span class="unnamed2"><br>
+	       윈도XP SP2가 설치되어 있으신 경우 팝업차단을 해제하시기 바랍니다.<br><br>
+
+	      해제하는 방법은 (1) 팝업창이 작동할 때 메뉴 하단에 (본문 상단) "팝업이 차단되었습니다. 팝업 또는 추가 옵션을 보시려면 여기를 클릭하십시오." 란을 클릭하시어 
+	      "현재 사이트의 팝업을 항상 허용"을 선택하시면 됩니다.<br><br>
+	      
+	      (2) 다른 방법은 익스플로러 메뉴의 "도구"를 선택하면 "팝업차단"이 보입니다. 여기에서 "팝업차단설정"을 선택하신 후 "허용할 사이트 주소"에
+	       "*.cbtkorea.com"을 입력해 주시면 됩니다.<br><br>
+	       
+	      (3) 각종 툴바가 설치되어 있는 경우 메뉴의 "도구"에 "팝업차단" 메뉴가 안보이는 경우가 종종 발생합니다. 
+	      이 경우 (가)툴바를 삭제하시고 (나)Windows Update 사이트에서 최신 익스플로러로 업데이트 하시고, 위 (2)의 방법으로 팝업차단설정을 하시기 바랍니다.<br><br>
+
+                  </span>
+                  </td>
+                <td width="10" rowspan="2"></td>
+              </tr>
+              <tr> 
+                <td width="350" valign="middle" align="center"><img src="../img/news_www.gif" width="130" height="14" align="absmiddle"><br>
+                  <br>
+                  <br>
+                </td>
+                <td width="110" height="30" valign="middle" align="center">
+                  <!--창닫기-->
+                  <a href="#" onClick="window.close()"><input type="image" img src="../img/news_bt1.gif" width="68" height="20" align="absmiddle"></a>
+                  <br>
+                  <br>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

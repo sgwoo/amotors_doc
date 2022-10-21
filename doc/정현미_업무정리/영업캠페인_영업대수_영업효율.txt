@@ -1,0 +1,56 @@
+●테이블
+
+stat_bus_cmp_base : 영업켐페인기본데이타 - 영업대수
+stat_bus_cost_cmp_base : 영업켐페인기본데이타 - 영업효율
+STAT_BUS_CMP : 통합영업캠페인마감(구버전)
+STAT_BUS_CMP_v19 : 통합영업캠페인마감
+STAT_CMP : 캠페인마감결과
+campaign_var : 캠페인변수관리
+
+
+●프로시저
+
+--영업효율마감 : 매일 오후 8:30 실행
+P_SALE_COST_BASE_MAGAM  : 신차/재리스/연장 대여개시
+P_SALE_COST_BASE_MAGAM2 : 추가이용계약 & 임의연장
+P_SALE_COST_BASE_MAGAM3 : 중도해지위액금미수령분
+P_SALE_COST_BASE_MAGAM4 : 중도해지위액금미수령분-실수령위약금
+P_SALE_COST_BASE_MAGAM5 : 승계수수료
+P_SALE_COST_BASE_MAGAM6 : 신차/재리스/연장 정산
+P_SALE_COST_BASE_MAGAM7 : 신차/재리스/연장 정산 적용 결과값 영업효율
+P_SALE_COST_BASE_MAGAM9 : 출고지연대차 영업효율
+P_SALE_COST_BASE_MAGAM10 : 재리스수리비 추가분
+P_SALE_COST_BASE_MAGAM11 : 해지정산금감액분
+P_SALE_COST_BASE_MAGAM15 : 월렌트 신규,연장 영업효율
+P_SALE_COST_BASE_MAGAM_APPLY : 영업효율 영업담당, 영업사원별 현황 6대 이상 처리 50%
+
+--영업대수 및 영업캠페인마감 : 매일 오후 8:30 실행
+P_STAT_BUS_CMP_BASE_MAGAM : 통합영업캠페인 기본데이타 마감
+P_STAT_BUS_CMP_MAGAM_SUC_ID : 영업효율캠페인 계약승계 원계약자 처리, 계약승계 최초원계약 담당자 없는 계약
+P_STAT_BUS_CMP_MAGAM : 통합영업캠페인 마감(구번전)
+P_STAT_BUS_CMP_MAGAM_v19 : 통합영업캠페인 마감(신버전-현재사용분)
+P_STAT_BUS_CMP_BASE_APPLY : 영업대수 영업담당, 영업사원별 현황 6대 이상 처리 최대1.5, P_STAT_BUS_CMP_BASE_MAGAM 에 있는거 분리함
+
+--영업효율마감 미사용
+P_SALE_COST_BASE_MAGAM8  : 주석처리, 계약승계 최초원계약자한테 하면서 cost_st='6' 에서 처리하고 여기는 돌리지 않는다
+P_SALE_COST_BASE_MAGAM13 : 월렌트 정상계약 비용 --> rent_cont 월렌트는 이제 없다 미사용 소스 정리
+P_SALE_COST_BASE_MAGAM14 : 월렌트정산, 000014_RM과 같음
+P_SALE_COST_BASE_MAGAM14_RM : 월렌트정산 -> 월렌트정산견적이 없는 계약만 가져오고 견적한다.  2019.02.01 부터는 해지기준에서 개시기준으로 변경, 15에서 처리하고 이거는 미사용처리
+P_SALE_COST_BASE_MAGAM16 : 중도정산금 발생 특별감면액 (작업보류)
+
+
+●메뉴
+
+12	 경영정보 - 캠페인관리	 (신)영업캠페인1군
+13	 경영정보 - 캠페인관리	 (신)영업캠페인2군
+7	 경영정보 - 캠페인관리	 캠페인실적(외근)
+8	 경영정보 - 캠페인관리	 캠페인실적(내근)
+9	 경영정보 - 캠페인관리	 캠페인지급현황
+
+1	 경영정보 - 영업효율관리	 상품별영업효율현황
+2	 경영정보 - 영업효율관리	 사원별영업효율현황
+3	 경영정보 - 영업효율관리	 영업효율관리
+4	 경영정보 - 영업효율관리	 추가이용효율등록
+5	 경영정보 - 영업효율관리	 정산효율등록
+6	 경영정보 - 영업효율관리	 효율재등록
+7	 경영정보 - 영업효율관리	 임의연장효율등록

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--  PayMethod 스피너 목록 -->
+    <string-array name="PayMethod">
+        <item>신용카드(일반)</item>
+        <item>계좌이체</item>
+        <item>무통장입금</item>
+        <item>ARSPay Web Link</item>
+        <item>SMS카드결제 Web LINK(인증)</item>
+        <item>SMS카드결제 Web LINK(수기)</item>
+        <item>수기결제 WebLink</item>
+
+    </string-array>
+
+
+</resources>

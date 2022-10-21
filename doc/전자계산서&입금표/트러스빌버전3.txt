@@ -1,0 +1,240 @@
+select * from saleebill where length(email)>40;
+select * from saleebill where length(coaddr)>150;
+select * from saleebill where length(recemail)>40;
+select * from saleebill where length(reccoaddr)>150;
+
+alter table branch        add    taxregno       varchar2(4);
+
+alter table tax_item_list add    item_dt 	varchar2(8);
+
+alter table tax_item      add    tax_code 	varchar2(15);
+alter table tax_item      add    tax_est_dt	varchar2(8);
+alter table tax_item      add    tax_no		varchar2(15);
+alter table tax_item      add    use_yn		varchar2(1);
+alter table tax_item      add    cancel_dt	varchar2(8);
+alter table tax_item      add    cancel_cont	varchar2(500);
+
+
+
+
+
+
+alter table tax_item_list modify item_g 	varchar2(100);
+
+alter table tax modify tax_g 			varchar2(100);
+alter table tax modify tax_bigo 		varchar2(150);
+alter table tax modify resseq			varchar2(21);
+alter table tax modify reccoregno		varchar2(13);
+alter table tax modify recconame		varchar2(70);
+alter table tax modify reccoceo			varchar2(30);
+
+alter table tax add    taxregno			varchar2(4);
+alter table tax add    reccoregnotype 		char(2);
+alter table tax add    doctype			varchar2(4);
+
+
+alter table saleebill modify resseq 		varchar2(21);
+
+alter table saleebill add    ebillkind 		number(1);
+comment on column saleebill.refcoregno 		is '버전3삭제';
+comment on column saleebill.refconame 		is '버전3삭제';
+comment on column saleebill.taxsnum1 		is '버전3삭제';
+comment on column saleebill.taxsnum2 		is '버전3삭제';
+comment on column saleebill.taxsnum3 		is '버전3삭제';
+alter table saleebill add    taxsnum 		varchar2(24);
+comment on column saleebill.origin 		is '버전3삭제';
+comment on column saleebill.bookno1 		is '버전3삭제';
+comment on column saleebill.bookno2 		is '버전3삭제';
+alter table saleebill modify remarks 		varchar2(150);
+alter table saleebill add    remarks2 		varchar2(150);
+alter table saleebill add    remarks3 		varchar2(150);
+
+alter table saleebill add    memdeptname	varchar2(40);
+alter table saleebill modify memname 		varchar2(30);
+alter table saleebill modify email  		varchar2(40);
+alter table saleebill modify coregno 		varchar2(13);
+alter table saleebill add    cotaxregno		varchar2(4);
+alter table saleebill modify coname  		varchar2(70);
+alter table saleebill modify coceo  		varchar2(30);
+alter table saleebill modify coaddr  		varchar2(150);
+comment on column saleebill.vidcheck  		is '버전3삭제';
+
+alter table saleebill add    recmemdeptname 	varchar2(40);
+alter table saleebill modify recmemname		varchar2(30);
+alter table saleebill modify recemail		varchar2(40);
+alter table saleebill add    recmemid2		varchar2(12);
+alter table saleebill add    recmemdeptname2 	varchar2(40);
+alter table saleebill add    recmemname2 	varchar2(12);
+alter table saleebill add    recemail2		varchar2(12);
+alter table saleebill add    rectel2		varchar2(12);
+alter table saleebill add    reccoregnotype 	char(2);
+alter table saleebill modify reccoregno 	varchar2(13);
+alter table saleebill add    reccotaxregno 	varchar2(4);
+alter table saleebill modify recconame  	varchar2(70);
+alter table saleebill modify reccoceo  		varchar2(30);
+alter table saleebill modify reccoaddr 		varchar2(150);
+
+alter table saleebill add    brokermemid 	varchar2(12);
+alter table saleebill add    brokermemdeptname 	varchar2(40);
+alter table saleebill add    brokermemname 	varchar2(30);
+alter table saleebill add    brokeremail 	varchar2(40);
+alter table saleebill add    brokertel 		varchar2(20);
+alter table saleebill add    brokercoregno 	varchar2(13);
+alter table saleebill add    brokercotaxregno 	varchar2(4);
+alter table saleebill add    brokerconame 	varchar2(70);
+alter table saleebill add    brokercoceo 	varchar2(30);
+alter table saleebill add    brokercoaddr 	varchar2(150);
+alter table saleebill add    brokercobiztype 	varchar2(40);
+alter table saleebill add    brokercobizsub 	varchar2(40);
+
+alter table saleebill modify supprice 		number(18);
+alter table saleebill modify tax 		number(18);
+alter table saleebill modify cash 		number(18);
+alter table saleebill modify cheque 		number(18);
+alter table saleebill modify bill 		number(18);
+alter table saleebill modify outstand 		number(18);
+
+
+comment on column saleebill.itemdate1  		is '버전3삭제';
+comment on column saleebill.itemname1  		is '버전3삭제';
+comment on column saleebill.itemtype1  		is '버전3삭제';
+comment on column saleebill.itemqyt1  		is '버전3삭제';
+comment on column saleebill.itemprice1  	is '버전3삭제';
+comment on column saleebill.itemtax1  		is '버전3삭제';
+comment on column saleebill.itemremarks1	is '버전3삭제';
+comment on column saleebill.itemdate2  		is '버전3삭제';
+comment on column saleebill.itemname2  		is '버전3삭제';
+comment on column saleebill.itemtype2  		is '버전3삭제';
+comment on column saleebill.itemqyt2  		is '버전3삭제';
+comment on column saleebill.itemprice2  	is '버전3삭제';
+comment on column saleebill.itemtax2  		is '버전3삭제';
+comment on column saleebill.itemremarks2	is '버전3삭제';
+comment on column saleebill.itemdate3  		is '버전3삭제';
+comment on column saleebill.itemname3  		is '버전3삭제';
+comment on column saleebill.itemtype3  		is '버전3삭제';
+comment on column saleebill.itemqyt3  		is '버전3삭제';
+comment on column saleebill.itemprice3  	is '버전3삭제';
+comment on column saleebill.itemtax3  		is '버전3삭제';
+comment on column saleebill.itemremarks3	is '버전3삭제';
+comment on column saleebill.itemdate4  		is '버전3삭제';
+comment on column saleebill.itemname4  		is '버전3삭제';
+comment on column saleebill.itemtype4  		is '버전3삭제';
+comment on column saleebill.itemqyt4  		is '버전3삭제';
+comment on column saleebill.itemprice4  	is '버전3삭제';
+comment on column saleebill.itemtax4  		is '버전3삭제';
+comment on column saleebill.itemremarks4	is '버전3삭제';
+
+alter table saleebill modify pubcode 		varchar2(64);
+alter table saleebill add    sms 	 	varchar2(11);
+alter table saleebill add    nts_issueid 	varchar2(24);
+
+
+CREATE TABLE EB_NTS_RESULT_CODE (
+  NTS_RESULT      VARCHAR2(6),
+  NTS_RESULT_CONT VARCHAR2(100),
+   CONSTRAINT EB_NTS_RESULT_CODE_PK PRIMARY KEY ( NTS_RESULT ) );
+
+
+
+
+
+case when e.tax_out_dt > '20091231' then e.req_dt else e.tax_out_dt end tax_out_dt
+
+
+EBILLKIND, TAXSNUM, REMARKS2, REMARKS3, MEMDEPTNAME, COTAXREGNO, RECMEMDEPTNAME,
+RECMEMID2, RECMEMDEPTNAME2, RECMEMNAME2, RECEMAIL2, RECTEL2,
+RECCOREGNOTYPE, RECCOTAXREGNO, BROKERMEMID, BROKERMEMDEPTNAME, BROKERMEMNAME,
+BROKEREMAIL, BROKERTEL, BROKERCOREGNO, BROKERCOTAXREGNO, BROKERCONAME, BROKERCOCEO,
+BROKERCOADDR, BROKERCOBIZTYPE, BROKERCOBIZSUB, SMS, NTS_ISSUEID
+
+EBILLKIND
+TAXSNUM
+REMARKS2
+REMARKS3
+MEMDEPTNAME
+COTAXREGNO
+RECMEMDEPTNAME
+RECMEMID2
+RECMEMDEPTNAME2
+RECMEMNAME2
+RECEMAIL2
+RECTEL2
+RECCOREGNOTYPE
+RECCOTAXREGNO
+BROKERMEMID
+BROKERMEMDEPTNAME
+BROKERMEMNAME
+BROKEREMAIL
+BROKERTEL
+BROKERCOREGNO
+BROKERCOTAXREGNO
+BROKERCONAME
+BROKERCOCEO
+BROKERCOADDR
+BROKERCOBIZTYPE
+BROKERCOBIZSUB
+SMS
+NTS_ISSUEID
+
+
+		query = " INSERT INTO saleebill"+
+				" ( resseq, doctype, doccode, customs, refcoregno, refconame, taxsnum1, taxsnum2, taxsnum3, docattr,"+//1
+				"   origin, pubdate, systemcode, pubtype, pubform, bookno1, bookno2, remarks, memid, memname,"+//2
+				"   email, tel, coregno, coname, coceo, coaddr, cobiztype, cobizsub, vidcheck, recmemid,"+//3
+				"   recmemname, recemail, rectel, reccoregno, recconame, reccoceo, reccoaddr, reccobiztype, reccobizsub, supprice,"+//4
+				"   tax, cash, cheque, bill, outstand, itemdate1, itemname1, itemtype1, itemqyt1, itemprice1,"+//5
+				"	itemsupprice1, itemtax1, itemremarks1, itemdate2, itemname2, itemtype2, itemqyt2, itemprice2, itemsupprice2, itemtax2,"+//6
+				"	itemremarks2, itemdate3, itemname3, itemtype3, itemqyt3, itemprice3, itemsupprice3, itemtax3, itemremarks3, itemdate4,"+//7
+				"	itemname4, itemtype4, itemqyt4, itemprice4, itemsupprice4, itemtax4, itemremarks4, pubkind, loadstatus, pubcode,"+//8
+				"   pubstatus,"+//9
+				"	EBILLKIND, TAXSNUM, REMARKS2, REMARKS3, MEMDEPTNAME, COTAXREGNO, RECMEMDEPTNAME, "+//1
+				"	RECMEMID2, RECMEMDEPTNAME2, RECMEMNAME2, RECEMAIL2, RECTEL2, "+//2
+				"	RECCOREGNOTYPE, RECCOTAXREGNO, BROKERMEMID, BROKERMEMDEPTNAME, BROKERMEMNAME, "+//3
+				"	BROKEREMAIL, BROKERTEL, BROKERCOREGNO, BROKERCOTAXREGNO, BROKERCONAME, BROKERCOCEO, "+//4
+				"	BROKERCOADDR, BROKERCOBIZTYPE, BROKERCOBIZSUB, SMS, NTS_ISSUEID "+//5
+				" ) VALUES"+
+				" ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"+
+				"   ?, replace(?, '-', ''), ?, ?, ?, ?, ?, ?, ?, ?,"+
+				"   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"+
+				"   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"+
+				"   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"+
+				"   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"+
+				"   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"+
+				"   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"+
+				"   ?, "+
+				"   ?, ?, ?, ?, ?, ?, ?, "+
+				"	?, ?, ?, ?, ?, "+
+				"   ?, ?, ?, ?, ?, "+
+				"   ?, ?, ?, ?, ?, ?, "+
+				"   ?, ?, ?, ?, ? "+
+				"   )";
+
+
+			pstmt.setInt   	(82,	bean.getEBillkind			());
+			pstmt.setString (83,	bean.getTaxSNum				());
+			pstmt.setString	(84,	bean.getRemarks2			());
+			pstmt.setString	(85,	bean.getRemarks3			());
+			pstmt.setString	(86,	bean.getMemDeptName			());
+			pstmt.setString	(87,	bean.getCoTaxRegNo			());
+			pstmt.setString	(88,	bean.getRecMemDeptName		());
+			pstmt.setString	(89,	bean.getRecMemId2			());
+			pstmt.setString (90,	bean.getRecMemDeptName2		());
+			pstmt.setString	(91,	bean.getRecMemName2			());
+			pstmt.setString	(92,	bean.getRecEMail2			());
+			pstmt.setString	(93,	bean.getRecTel2				());
+			pstmt.setString	(94,	bean.getRecCoRegNoType		());
+			pstmt.setString	(95,	bean.getRecCoTaxRegNo		());
+			pstmt.setString	(96,	bean.getBrokerMemId			());
+			pstmt.setString	(97,	bean.getBrokerMemDeptName	());
+			pstmt.setString	(98,	bean.getBrokerMemName		());
+			pstmt.setString	(99,	bean.getBrokerEMail			());
+			pstmt.setString (100,	bean.getBrokerTel			());
+			pstmt.setString	(101,	bean.getBrokerCoRegNo		());
+			pstmt.setString	(102,	bean.getBrokerCoTaxRegNo	());
+			pstmt.setString	(103,	bean.getBrokerCoName		());
+			pstmt.setString	(104,	bean.getBrokerCeo			());
+			pstmt.setString	(105,	bean.getBrokerAddr			());
+			pstmt.setString	(106,	bean.getBrokerBizType		());
+			pstmt.setString	(107,	bean.getBrokerBizSub		());
+			pstmt.setString	(108,	bean.getSms					());
+			pstmt.setString	(109,	bean.getNts_IssueId			());

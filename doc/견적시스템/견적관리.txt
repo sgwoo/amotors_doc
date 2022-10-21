@@ -1,0 +1,121 @@
+●테이블
+
+1) 변수
+ESTI_JG_VAR : 차종코드별변수
+ESTI_JG_OPT_VAR : 차종코드별변수중 색상&옵션 잔가반영
+ESTI_COMM_VAR : 공통변수 (이자율외)
+ESTI_CAR_VAR : 차종분류별변수 (보험료외)
+ESTI_SIK_VAR : 계산시변수 (jsp 파일내 javascript 에서 사용, 그외 고정값 관리로 사용)
+
+2) 견적서
+ESTIMATE : FMS 신차견적내가, 재리스견적내기, 계약 정상요금 계산하기 등 사용자가 견적
+ESTIMATE_HP : 주요차종견적용, 홈페이지 신차견적
+ESTIMATE_SH : 재리스견적용, 홈페이지 재리스견적
+ESTIMATE_CU : 홈페이지 고객 실시간견적, 간편견적
+
+3) 견적참고 : 견적과정 항목별 계산값 (검증용 혹은 각종현황에 사용)
+ESTI_EXAM : 사용자견적
+ESTI_EXAM_HP : 홈페이지신차견적
+ESTI_EXAM_SH : 홈페이지재리스견적
+ESTI_EXAM_CU : 홈페이지고객견적
+
+3) 견적비용비교 : 견적서별 비용비교 항목 계산값
+ESTI_COMPARE : 사용자견적
+ESTI_COMPARE_HP : 홈페이지신차견적
+ESTI_COMPARE_SH : 홈페이지재리스견적
+ESTI_COMPARE_CU : 홈페이지고객견적
+
+3) 기타
+ESTI_SPE : 상담요청내용
+ESTI_SPE_CAR : 상담요청차량정보
+ESTI_MGR : 상담및예약시 운전자정보등
+ESTI_M : 견적메모
+ESTI_PACK : 메일용묶음
+
+4) 미사용
+ESTI_REG : 사원별견적업무관리 (사원별 고객상담업무 파악위해 관리하기로 하고,현재사용안함,메뉴도 정리해서 없음)
+ESTI_LIST : 사원별견적업무관리
+ESTI_CONT : 사원별견적업무관리
+ESTI_SH_VAR : 차종코드3자리수일때 변수(견적 초기구축)
+ESTI_RM : 월렌트 1개월 재견적시 (현재사용안함. 무조건1개월에 네비 관리안함)
+ESTI : 미사용 (데이터없음)
+COMMONVAR : 견적통합변수테이블 (2020년작업후보류중)
+
+●프로시저
+
+1) 신차견적 (P_ESTI_JANGA->P_ESTI_FEEAMT->P_ESTI_CLSPER 처리순)
+P_ESTI_JANGA : 잔가계산
+P_ESTI_FEEAMT : 대여료계산
+P_ESTI_CLSPER : 위약율계산
+
+2) 재리스견적 (P_ESTI_SH_CAR_AMT->P_ESTI_SH_FEEAMT 처리순)
+P_ESTI_SH_CAR_AMT : 중고차가계산
+P_ESTI_SH_FEEAMT : 대여료계산
+
+3) 일괄견적
+P_ESTI_REG_HP_RES : 주요차종견적 일괄처리 (우선순위번호,약정주행거리로 P_ESTI_REG_HP 호출)
+P_ESTI_REG_HP : 우선순위번호,약정주행거리 기준(60건1묶음, estimate insert, P_ESTI_JANGA/P_ESTI_FEEAMT/P_ESTI_CLSPER 호출) 
+P_ESTI_REG_SH2 : 일일 재리스견적 일괄처리 (차량,약정주행거리로 P_ESTI_REG_SH 호출)
+P_ESTI_REG_SH : 차량,약정주행거리 기준 (20건1묶음, estimate_sh insert, P_ESTI_SH_CAR_AMT/P_ESTI_SH_FEEAMT/P_ESTI_SH_UPLOAD 호출) 
+
+4) 홈페이지반영
+P_ESTI_HP_UPLOAD : 주요차종 신차견적 홈페이지반영, 주요차종관리에서 전체 호출, main_car insert
+P_ESTI_SH_UPLOAD : 재리스견적 홈페이지반영, 재리스견적시 차량하나씩 호출, secondhand insert
+
+5) 기타
+P_ESTI_SH_BASE : 보유차 정보 최신으로 반영(보유차,재리스 견적시 선처리)
+P_ESTI_REG_SH_OFFLS_ALL_CAR : 월마감경매낙찰가견적
+P_ESTI_REG_SH_OFFLS_ALL_CAR_RE : 월마감경매낙찰가재견적
+P_ESTI_REG_SH_OFFLS_ALL_CAR_SU : 월마감매각예정기준차가
+P_ESTI_REG_SH_OFFLS_END_CAR : 월마감만기도래기준차가
+P_ESTI_REG_SH_TIDY : 견적정리, 신차/재리스견적중 30일이전 10000번 이후 삭제, 삭제견적중 참고테이블 남은거 삭제
+P_ESTI_REG_SH_END : 계약만료일 경과 미청구분 채권반영 잔가계산
+P_ESTI_REG_SH_EMP : 업무지원차량 매월초 견적 (비용캠페인 등 사용)
+P_ESTI_REG_SH_EMP3 : 업무지원차량 중 월중간에 배정되어 매월견적이 없는건 업무대여견적 계산, P_ESTI_REG_SH_EMP 호출
+P_ESTI_REG_SH_RES : 보유차 사고대차 대여료 매월 초견적(비용캠페인 등 사용)
+P_ESTI_REG_SH_RES3 : 보유차 월중간에 배정되어 매월견적이 없는건 업무대여견적 계산, P_ESTI_REG_SH_RES 호출
+P_ESTI_REG_SH_AUTO : P_ESTI_REG_SH2 새벽처리분외 정오,오후3시,오후6시 기준을 추가등록분 자동 재리스견적
+P_ESTI_REG_SH_OFFLS : 매각관리-경매낙찰차량에서 실예상낙찰가 계산하기
+
+6) 미사용
+P_ESTI_REG_HP2 : 소스주석처리됨. FMS 주요차종견적 한건씩 처리 (P_ESTI_REG_HP 호출) - 2019-05-08 약정주행거리 증가로 일괄견적 처리수가 많아 한번에 하는것은 안한다
+P_ESTI_SH_UPLOAD2 : 소스주석처리됨. 미사용, 201701 P_ESTI_SH_UPLOAD 하나만 쓴다
+P_ESTI_RUNAMT : 소스주석처리함. 미사용, 대여료계산 프로시저에서 처리함. 신차초과운행부담금계산
+P_ESTI_REG_CMP_ADD : 핵심소스주석처리됨. 영업효율캠페인 정산/추가분 자동처리분 - 결과안맞아서 사용안함. 배차호출확인완료-0건
+P_ESTI_REG_EV : 소스주석처리함. 현재는 사용안함. 전기차/수소차 기본식 반납형 일괄처리
+P_ESTI_REG_SH_TAE : 소스주석처리함. 출고전대차 1개월 견적 등록, 확인요
+P_ESTI_REG_HP_BK : 주요차종 견적 잘못 등록분 전견적으로 돌리기, P_ESTI_HP_UPLOAD에서 점검, 실제사용여부확인필요, 해당건 필요시 개별 실행한 것으로 추정
+P_ESTI_REG_HP_READY : 주요차종 견적 등록 시작전 기존 견적이 없는경우 처리, 실제사용여부확인필요, 해당건 필요시 개별 실행한 것으로 추정
+P_ESTI_REG_SH_EMP2 : 확인요
+P_ESTI_REG_SH_RES2 : 확인요
+
+7) 견적변수통합 변환처리 및 견적정리(2020년작업후보류중)
+P_COMMONVAR_COMM_REG : 기존 견적변수를 통합관리로 자동등록, 이후 반영안됨
+P_COMMONVAR_CAR_REG
+P_COMMONVAR_JG_OPT_REG
+P_COMMONVAR_JG_REG
+P_COMMONVAR_DEF
+
+
+●메뉴
+
+1	 영업관리 - 견적관리	 스마트견적관리
+2	 영업관리 - 견적관리	 신차다중견적내기
+3	 영업관리 - 견적관리	 신차견적서관리
+4	 영업관리 - 견적관리	 재리스견적내기
+5	 영업관리 - 견적관리	 재리스견적관리
+6	 영업관리 - 견적관리	 월렌트견적내기
+7	 영업관리 - 견적관리	 월렌트견적관리
+8	 영업관리 - 견적관리	 업무대여견적
+9	 영업관리 - 견적관리	 일반대차견적
+10	 영업관리 - 견적관리	 견적사후관리
+11	 영업관리 - 견적관리	 고객견적서관리
+12	 영업관리 - 견적관리	 연장견적관리
+13	 영업관리 - 견적관리	 출고대차견적관리
+14	 영업관리 - 견적관리	 견적점검
+15	 현황 및 통계 - 영업관리	 신차견적서3개월전
+16	 현황 및 통계 - 영업관리	 재리스견적3개월전
+17	 FMS운영관리 - SMS 및 이메일	 견적서메일관리
+18	 FMS운영관리 - Master	 견적변수관리
+
+

@@ -1,0 +1,7 @@
+용품설치일자를 확인하십시오. tint_no=202208170003, off_nm=주식회사미성테크, nvl(b.dlv_dt,a.reg_dt)=20220816, sup_dt=2020081812
+
+용품일자 이상등록분 자동메시지 처리
+
+SELECT * FROM car_tint WHERE tint_no='202208170003'
+
+reg_dt, sup_est_dt, sup_dt 등 날짜 확인하고 변경, 대부분 년도 잘못입력

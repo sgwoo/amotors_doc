@@ -1,0 +1,22 @@
+●테이블
+
+ars_call_log : ARS콜로그
+ars_call_log_temp : 아마존카API 호출로그
+ars_call_stat : ARS콜 당직현황
+
+
+
+●프로시저
+
+P_ARS_CALL_STAT : ARS CALL 실제 통화 현황 중 당직대상자 처리, 당직비파일용마감일자 처리
+P_ARS_TRANS_TELL : 당일 당직자에게 ARS착신 등록/해제 메시지 자동발송
+
+
+●API
+
+/acar/ars/ars_api_ajax.jsp : ARS 콜중 호출 API
+
+
+●메뉴
+
+1	 차량관리 - 정비/검사/방문관리	 ARS관리

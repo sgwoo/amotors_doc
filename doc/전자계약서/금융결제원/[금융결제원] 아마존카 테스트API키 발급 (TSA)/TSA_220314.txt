@@ -1,0 +1,15 @@
+o 이용기관 : 아마존카(테스트)
+o Orgcode : DF60170000
+
+o API Key (client_id) : 1d99a459-d9d1-4f22-9e2c-a3db8658f66e
+o client_secret         : 
+5bee4216-7608-430b-97a3-ed02f2687d4d
+
+※ client_id, client_secret은 표준방식 API 호출 시 사용해야 하는 정보입니다. 
+
+
+
+
+
+
+

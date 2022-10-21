@@ -1,0 +1,80 @@
+●테이블
+
+amazoncar.pay : 출금원장
+amazoncar.pay_item : 출금원장 세부항목리스트
+amazoncar.pay_search : 연동이용테이블, 조회등록시 pay_search insert이후 집계해서 원장등록
+amazoncar.pay_act : 송금원장, 출금원장 bank_code/거래처/입금계좌/출금계좌로 묶어 송금연동 (동일이체는 하나로 묶어 처리)
+
+*신한은행집금관리
+ebank.IB_BULK_TRAN : 대량이체처리결과
+ebank.IB_REMITTEE_NM : 수취인성명조회결과
+
+
+●프로시저
+
+* 미지급금전표 발행은 필요시 선택처리
+P_PAY_25300_AUTODOCU_S_NEOE : 조회등록분 미지급금 전표 생성 - 버튼클릭시
+P_PAY_25300_AUTODOCU_NEOE   : 조회등록분 미지급금 전표 생성 - 버튼클릭시 
+P_PAY_25300_AUTODOCU_E_NEOE : 직접등록분중 미지급금발행여부가 [원장등록시 미지급금 전표를 발행하겠다] 인 출금의 미지급금 전표 생성 - 원장등록시
+
+P_PAY_ACCOUNT_NEOE : 출금회계관리에서 호출, 조회등록분 회계전표 생성
+P_PAY_ACCOUNT_ETC_NEOE : 출금회계관리에서 호출, 직접등록분 회계전표 생성
+
+P_PAY_AUTO_REG : 할부금상환분 출금 자동등록, 건수가 많은 경우 조회등록에서 선택이 어려움
+
+P_PAY_RESULT_SEND : 출금송금후 담당자,관련자에게 송금결과 메일,메시지,알림톡 발송
+P_PAY_RESULT_SEND_CARAMT : 자동차대금 출금송금후 담당자,관련자에게 송금결과 메일,메시지,알림톡 발송
+P_PAY_RESULT_SEND_CARAMT_FAX : 출고영업소에 자동차대금 카드승인정보 FAX 확인요청 알림톡 발송
+
+
+
+●코드
+
+code.c_st='0043' : 계정과목
+
+
+●메뉴  (메뉴명검색)
+
+2	 재무회계 - 출금관리	 출금원장[조회]등록
+3	 재무회계 - 출금관리	 출금원장[직접]등록
+4	 재무회계 - 출금관리	 출금원장[엑셀]등록
+5	 재무회계 - 출금관리	 출금등록관리
+6	 재무회계 - 출금관리	 출금문서관리
+7	 재무회계 - 출금관리	 출금송금요청
+8	 재무회계 - 출금관리	 출금송금결과
+9	 재무회계 - 출금관리	 출금회계관리
+10	 재무회계 - 출금관리	 출금원장관리
+11	 재무회계 - 출금관리	 직원전기차충전출금등록
+
+
+●처리
+
+조회등록 : pay_search -> pay, pay_item -> pay_act
+
+직접등록 : pay, pay_item -> pay_act
+
+출금등록관리 리스트 : pay.p_step = '0' 
+
+출금등록관리에서 결재요청 처리 : pay_b_doc_a.jsp 에서 doc_code, p_req_dt, p_step ='1' update
+
+출금문서관리에서 지출결재기안 처리 : pay_doc_sanction.jsp 에서 doc_code, p_est_dt2, p_step ='2' update
+
+출금송금요청에서 송금요청 처리 : pay_a_cms_req_a.jsp 에서 
+                                 pay.off_nm/bank_id/bank_no/a_bank_id/a_bank_no로 묶어 pay_act insert
+                                 자동차대금 지급완료 알림톡 등 발송처리 프로시저 호출 call_sp_pay_result_send_caramt
+                                 pay a_pay_dt update
+
+출금송금결과에서 은행연동전송 처리 : pay_r_bank_put_a.jsp 에서 pay_act 송금관리 신한은행연동 생성, 
+                                     pay_act.bank_id,bank_cms_bk,a_bank_id,a_bank_cms_bk update, insert ebank.IB_BULK_TRAN, insert ebank.IB_REMITTEE_NM
+                 은행결과수신 처리 : pay_r_bank_get_a.jsp 에서 ebank.IB_BULK_TRAN 신행은행연동 처리결과 pay_act 연동 
+                                     r_act_dt,act_bit,rs_code update, pay p_pay_dt,p_step='4' update
+                 송금결과등록 처리 : pay_r_cms_rs.jsp 은행연동으로 안하고 직접 결과등록처리
+
+출금회계관리에서 출금자동전표발행 처리 : pay_c_account.jsp 에서 자동전표발행 프로시저 호출 call_sp_pay_account.jsp, 
+                                         pay pay_code, p_step='5', autodocu_data_gubun,autodocu_write_date,autodocu_date_no update 
+                 기발행처리 : 더존전표는 이미 발행되었을 경우 기발행처리만 한다. pay p_step='5' update 
+
+
+
+   
+

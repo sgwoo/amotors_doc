@@ -1,0 +1,48 @@
+2022월7월28일 사장님 전달자료 쿼리문
+
+
+-- 2021년12월31일 기준 보유차량 23,082대 
+-- 2021년 대여개시 신차 현황만 - 7/28
+SELECT con_mon, COUNT(0) cnt, ROUND(AVG(per1),2) per1, ROUND(AVG(per2),2) per2
+FROM  (
+				SELECT car_no, car_nm, init_reg_dt, end_reg_dt, car_st, con_mon, rent_start_dt, rent_end_dt, car_b_amt, opt_s_amt, grt_amt_s, pp_s_amt, fee_s_amt,  
+       			   amt1, round(amt1/car_b_amt*100,2) AS per1,
+       			   amt2, round(amt2/car_b_amt*100,2) AS per2       
+			  FROM 
+			        (
+				        SELECT DECODE(a.car_st,'1','렌트','2','보유차','3','리스','4','월렌트','5','업무대여') car_st,
+                       b.car_no, b.car_nm, a.init_reg_dt, a.end_reg_dt, a.con_mon, a.rent_start_dt, a.rent_end_dt, a.car_b_amt, c.opt_s_amt, 
+                       a.grt_amt_s, c.pp_s_amt, a.fee_s_amt,
+                       --1) 보증금 + 사용기한 임대 환산금액 (추정액 포함)
+                       a.grt_amt_s +
+                       CASE WHEN a.end_reg_dt > a.save_dt AND a.car_st<>'2' 
+                            THEN TRUNC((a.fee_s_amt+(c.pp_s_amt/a.con_mon))*(60-a.b_car_mon)/(1+0.03))                         
+	                          ELSE 0 
+                       END amt1,
+                       --2) 보증금 + 사용기한 임대 환산금액 (추정액 미포함)
+                       a.grt_amt_s +
+                       CASE WHEN a.end_reg_dt > a.save_dt AND a.car_st<>'2' AND a.rent_end_dt ='-' AND (60-a.b_car_mon) >  a.con_mon 
+                            THEN TRUNC((a.fee_s_amt+(c.pp_s_amt/a.con_mon))*a.con_mon/(1+0.03))
+                            WHEN a.end_reg_dt > a.save_dt AND a.car_st<>'2' AND a.rent_end_dt ='-' AND (60-a.b_car_mon) <= a.con_mon 
+                            THEN TRUNC((a.fee_s_amt+(c.pp_s_amt/a.con_mon))*(60-a.b_car_mon)/(1+0.03))
+                            WHEN a.end_reg_dt > a.save_dt AND a.car_st<>'2' AND a.end_reg_dt <= NVL(a.scd_end_dt,a.rent_end_dt) 
+                            THEN TRUNC((a.fee_s_amt+(c.pp_s_amt/a.con_mon))*(60-a.b_car_mon)/(1+0.03))                         
+                            WHEN a.end_reg_dt > a.save_dt AND a.car_st<>'2' AND a.end_reg_dt >  NVL(a.scd_end_dt,a.rent_end_dt) 
+                            THEN TRUNC((a.fee_s_amt+(c.pp_s_amt/a.con_mon))*(trunc(to_number(to_date(NVL(a.scd_end_dt,a.rent_end_dt),'YYYYMMDD')-to_date(a.save_dt,'YYYYMMDD'))/365*12,9))/(1+0.03))
+	                          ELSE 0 
+                       END amt2
+				        FROM   stat_rent_month a, car_reg b, fee c
+				        WHERE  a.save_dt='20211231' AND a.prepare NOT IN ('4','5') --2021-12-31 마감기준
+				        AND a.car_gu='1' AND a.fee_rent_st='1' --신차 신규계약
+				        AND a.rent_start_dt LIKE '2021%' --2021 대여개시
+				        AND a.end_reg_dt > a.save_dt --대상만
+				        AND a.car_mng_id=b.car_mng_id
+				        AND a.rent_l_cd=c.rent_l_cd AND a.fee_rent_st=c.RENT_ST
+				        --AND a.con_mon=60
+			        )
+			  ORDER BY 15 desc
+			)
+WHERE con_mon IN (12,24,36,48,60)      
+GROUP BY con_mon
+ORDER BY con_mon
+; 

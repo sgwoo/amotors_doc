@@ -1,0 +1,336 @@
+<!-- saved from url=(0022)http://internet.e-mail -->
+<!-- saved from url=(0022)http://internet.e-mail -->
+<!--
+************************************************************************************
+이페이지는 샘플페이지로 이미지 클릭처리만 가능합니다.
+확인이미지를 클릭하면 TursBill시연서버의 샘플세금계산서의 세금계산서를 호출합니다
+세금계산서 및 거래며세서를 호출하는 script부분을 참조하여 세금계산서 리스트를 출력하는 Page를 
+만들어 주시면 됩니다.
+
+TEST서버의 IP는 www.trusbill.or.kr입니다.
+실제 운영시에는 www.trusbill.or.kr로 바꿔주시면됩니다.
+*************************************************************************************
+-->
+
+
+<html>
+<head>
+<title>세금계산서함</title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<link href="http://www.trusbill.or.kr/css/trus_a.css" rel="stylesheet" type="text/css">
+</head>
+<script language="javaScript">
+
+   /***********************************************************************
+	리스트에서 세금계산서 보기 이미지를 클릭했을 경우 
+	리스트의 index값을 받아 해당 리스트 index의 발행코드(<input type="hidden" name="pubCode" value="KF02master0000000000012">의 value값)를 찾아 viewTaxInvoice(pubCode) 스크립트 함수를 호출합니다.
+	***********************************************************************/
+	function viewTaxOfPubCode(index){
+		var pubCode = "";
+		if(document.all['pubCode'] =='[object]'){
+			pubCode = document.all['pubCode'][index].value;
+			viewTaxInvoice(pubCode);
+		}
+	}
+
+	/***********************************************************************
+	리스트에서 거래명세서 보기 이미지를 클릭했을 경우 
+	리스트의 index값을 받아 해당 리스트 index의 발행코드(<input type="hidden" name="pubCode" value="KF02master0000000000012">의 value값)를 찾아 viewTaxInvoice(pubCode) 스크립트 함수를 호출합니다.
+	***********************************************************************/
+	function viewTradeSpecPubCode(index){
+		var pubCode = "";
+		if(document.all['pubCode'] =='[object]'){
+			pubCode = document.all['pubCode'][index].value;
+			viewTradeSpec(pubCode);
+		}
+	}
+	
+	/***********************************************************************
+	TrusBill세금계산서 Web화면을 POPUP창에 띄워줍니다.
+	이때 넘겨받은 세금계산서 발행코드(pubCode)를 POST방식으로 넘겨줍니다.
+	***********************************************************************/
+	function  viewTaxInvoice(pubCode){
+		var iMyHeight;
+		width = (window.screen.width-635)/2
+		if(width<0)width=0;
+		iMyWidth = width; 
+		height = 0;
+		if(height<0)height=0;
+		iMyHeight = height;
+		var taxInvoice = window.open("about:blank", "taxInvoice", "resizable=no,  scrollbars=no, left=" + iMyWidth + ",top=" + iMyHeight + ",screenX=" + iMyWidth + ",screenY=" + iMyHeight + ",width=680px, height=760px");
+		document.taxListForm.action="http://www.trusbill.or.kr/jsp/directTax/TaxViewIndex.jsp";
+		document.taxListForm.method="post";
+		document.taxListForm.pubCode.value=pubCode;
+		document.taxListForm.docType.value="T"; //세금계산서
+		document.taxListForm.userType.value="R"; // S=보내는쪽 처리화면, R= 받는쪽 처리화면
+		document.taxListForm.target="taxInvoice";
+		document.taxListForm.submit();
+		document.taxListForm.target="_self";
+		document.taxListForm.pubCode.value="";
+		taxInvoice.focus();
+		return;
+	}
+
+	/***********************************************************************
+	TrusBill거래명세서 Web화면을 POPUP창에 띄워줍니다.
+	이때 넘겨받은 세금계산서 발행코드(pubCode)를 POST방식으로 넘겨줍니다.
+	***********************************************************************/
+	function  viewTradeSpec(pubCode){
+		var iMyHeight;
+		width = (window.screen.width-660)/2
+		if(width<0)width=0;
+		iMyWidth = width; 
+		height = 0;
+		if(height<0)height=0;
+		iMyHeight = height;
+		var tradeSpec = window.open("about:blank", "tradeSpec", "resizable=yes,  scrollbars=auto, left=" + iMyWidth + ",top=" + iMyHeight + ",screenX=" + iMyWidth + ",screenY=" + iMyHeight + ",width=660px, height=500px, toolbar=yes");
+		document.taxListForm.action="http://www.trusbill.or.kr/jsp/directTax/TaxViewIndex.jsp";
+		document.taxListForm.method="post";
+		document.taxListForm.pubCode.value=pubCode;
+		document.taxListForm.docType.value="A"; //첨부문서
+		document.taxListForm.target="tradeSpec";
+		document.taxListForm.submit();
+		document.taxListForm.target="_self";
+		document.taxListForm.pubCode.value="";
+		tradeSpec.focus();
+		return;
+	}
+</script>
+
+<body bgcolor="#FFFFFF" text="#000000" leftmargin="5">
+			<!-- 
+			**********************************************************************************
+			세금계산서 일련번호를 전송하기 위한 form정의
+			pubCode에는 viewTaxInvoice script함수에서 넘겨받은 세금계산서 일련번호가 저장
+			docType는 문서구분 T=세금계산서, A=첨부문서(거래명세서)
+			userType 처리담당자구분 S=보낸쪽, R=받는쪽
+			***********************************************************************************
+			-->
+			<form name="taxListForm" method="get">
+				<input type="hidden" name="pubCode" >
+				<input type="hidden" name="docType" >
+				<input type="hidden" name="userType" >
+			</form>
+
+<table width="770" border="0" cellspacing="0" cellpadding="0">
+  <tr> 
+    </td>
+    <td width="620" valign="top" align="right"> 
+      <table width="620" border="0" cellspacing="0" cellpadding="5">
+        <tr> 
+          <td >&nbsp;
+          </td>
+        </tr>
+        <tr>
+          <td background="http://www.trusbill.or.kr/image/navy_bg.gif" height="25" class="blue">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HOME 
+            &gt; 구매/판매 내역 조회 <b>(순방향테스트-매출)</b></td>
+        </tr>
+      </table>
+      <table width="610" border="0" cellspacing="0" cellpadding="0">
+        <tr> 
+          <td height="18"></td>
+        </tr>
+        <tr> 
+          <td> 
+            <table width="610" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                <td width="43" valign="top" align="center"><img src="http://www.trusbill.or.kr/image/info_icon.gif" width="30" height="29"></td>
+                <td width="567" class="black">XXXX님이 구매/판매하신 내역입니다. 세금계산서 버튼을 클릭하여 수신승인해주시기 바랍니다.</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr> 
+          <td height="5"></td>
+        </tr>
+        <tr> 
+          <td background="http://www.trusbill.or.kr/image/dot_black.gif" height="1"></td>
+        </tr>
+        <tr> 
+          <td class="black"> 
+            <table width="610" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                <td width="17"><img src="http://www.trusbill.or.kr/image/tax_t2_2_1.gif" width="90" height="30"></td>
+                <td width="593">&nbsp;</td>
+              </tr>
+            </table>
+            <table width="607" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                <td><img src="http://www.trusbill.or.kr/image/dot_box_tax_top.gif" width="607" height="6"></td>
+              </tr>
+              <tr> 
+                <td background="http://www.trusbill.or.kr/image/dot_box_tax_bg.gif"> 
+                  <table width="595" border="0" cellspacing="0" cellpadding="4" align="center">
+                    <tr bgcolor="#FFFFFF"> 
+                      <td rowspan="2" class="black" bgcolor="#efefef"><img src="http://www.trusbill.or.kr/image/bulet_cross_blue.gif" width="17" height="6" align="absmiddle">일자별 
+                        검색 : </td>
+                      <td width="453" class="black"> &nbsp;&nbsp; 
+                        <input type="radio" name="radiobutton" value="radiobutton">
+                        전체&nbsp;&nbsp;&nbsp;&nbsp; 
+                        <input type="radio" name="radiobutton" value="radiobutton">
+                        금일&nbsp;&nbsp;&nbsp;&nbsp; 
+                        <input type="radio" name="radiobutton" value="radiobutton">
+                        전일&nbsp;&nbsp; 
+                        <input type="radio" name="radiobutton" value="radiobutton">
+                        금월&nbsp;&nbsp; 
+                        <input type="radio" name="radiobutton" value="radiobutton">
+                        전월&nbsp;&nbsp; </td>
+                    </tr>
+                    <tr bgcolor="#FFFFFF"> 
+                      <td width="453" class="black">&nbsp;&nbsp; 
+                        <input type="radio" name="radiobutton" value="radiobutton">
+                        <select name="select" size=1 onChange="changeMain(this.form)" onselectstart="alert('a')" style='background-color:#D2EAFF;'>
+                          <option>2002</option>
+                        </select>
+                        년 
+                        <select name="select2" size=1 onChange="changeMain(this.form)" onselectstart="alert('a')" style='background-color:#D2EAFF;'>
+                          <option>12</option>
+                        </select>
+                        월 
+                        <select name="select3" size=1 onChange="changeMain(this.form)" onselectstart="alert('a')" style='background-color:#D2EAFF;'>
+                          <option>12</option>
+                        </select>
+                        일 ~ 
+                        <select name="select4" size=1 onChange="changeMain(this.form)" onselectstart="alert('a')" style='background-color:#D2EAFF;'>
+                          <option>2002</option>
+                        </select>
+                        년 
+                        <select name="select4" size=1 onChange="changeMain(this.form)" onselectstart="alert('a')" style='background-color:#D2EAFF;'>
+                          <option>12</option>
+                        </select>
+                        월 
+                        <select name="select4" size=1 onChange="changeMain(this.form)" onselectstart="alert('a')" style='background-color:#D2EAFF;'>
+                          <option>12</option>
+                        </select>
+                        일</td>
+                    </tr>
+                    <tr> 
+                      <td height="1" width="126" bgcolor="ffffff"></td>
+                      <td height="1" width="453" bgcolor="#efefef"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr> 
+                <td><img src="http://www.trusbill.or.kr/image/dot_box_tax_down.gif" width="607" height="7"></td>
+              </tr>
+            </table>
+            <table width="610" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                <td height="10"></td>
+              </tr>
+              <tr>
+                <td bgcolor="#CCCCCC" height="1"></td>
+              </tr>
+            </table>
+            <table width="610" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                <td width="100" height="2"><img src="http://www.trusbill.or.kr/image/tax_t2_2_2.gif" width="90" height="30"></td>
+                <td width="513" align="center" height="2">&nbsp; </td>
+              </tr>
+            </table>
+            <table width="610" border="0" cellspacing="1" cellpadding="2" bgcolor="efefef">
+              <tr bgcolor="#efefef" align="center"> 
+                <td width="59" class="black_s">발급일자</td>
+                <td width="80" class="black_s">거래처명</td>
+                <td width="81" class="black_s">사업자등록번호</td>
+                <td width="78" class="black_s">공급가액</td>
+                <td width="70" class="black_s">세액</td>
+                <td width="55" class="black_s">세금계산서</td>
+				<td width="55" class="black_s">거래명세서</td>
+              </tr>
+
+			  <!--
+			    ***********************************************************************
+				SaleEbill테이블을 이용하여 리스트 작성을 for, while등 루프문등으로 처리하시면 됩니다.
+				
+				1.세금계산서 보기 이미지를 눌렀을때 viewTaxOfPubCode를 호출하고 
+				이 scirt함수에 parameter로 세금계산서 리스트의 index를 넘겨줍니다. 
+
+				2.거래명세서 보기 이미지를 눌렀을때 viewTradeSpecPubCode 호출하고 
+				이 scirt함수에 parameter로 세금계산서 리스트의 index를 넘겨줍니다.
+				
+				index는 0부터 시작합니다.
+				***********************************************************************
+				-->
+			  <tr style="background='white'" onMouseOver="this.style.background='#F7F7F7'" onMouseOut="this.style.background='white'"> 
+                <td width="59" align="center" class="black_s">2004-03-22</td>
+                <td width="80" align="center" class="black_s">정회원Test02</td>
+                <td width="81" align="center" class="black_s">888-88-88888  </td>
+                <td width="83" align="right" class="black_s">3738240원</td>
+                <td width="70" align="right" class="black_s">373824원</td>
+                <td width="55" align="center" class="black_s">
+					<a href="javascript:viewTaxOfPubCode(0)" onFocus="this.blur()"><img src="http://www.trusbill.or.kr/image/ico_annex.gif" width="12" height="16" border="0" ></a>
+					<input type="hidden" name="pubCode" value="KF029999999997test01S0128175049177"> <!--SaelEbill 테이블의 pubCod값 -->
+				</td>
+				<td width="55" align="center" class="black_s">
+					<a href="javascript:viewTradeSpecPubCode(0)" onFocus="this.blur()"><img src="http://www.trusbill.or.kr/image/ico_annex.gif" width="12" height="16" border="0" ></a>
+				</td>
+              </tr>
+
+
+			  <tr style="background='white'" onMouseOver="this.style.background='#F7F7F7'" onMouseOut="this.style.background='white'"> 
+                <td width="59" align="center" class="black_s">2004-03-19</td>
+                <td width="80" align="center" class="black_s">정회원Test02</td>
+                <td width="81" align="center" class="black_s">888-88-88888 </td>
+                <td width="83" align="right" class="black_s">1189100원</td>
+                <td width="70" align="right" class="black_s">118910원</td>
+                <td width="55" align="center" class="black_s">
+					<a href="javascript:viewTaxOfPubCode(1)" onFocus="this.blur()"><img src="http://www.trusbill.or.kr/image/ico_annex.gif" width="12" height="16" border="0" ></a>
+					<input type="hidden" name="pubCode" value="KF029999999997test01S0128175051308">
+				</td>
+				<td width="55" align="center" class="black_s">
+					<a href="javascript:viewTradeSpecPubCode(1)" onFocus="this.blur()"><img src="http://www.trusbill.or.kr/image/ico_annex.gif" width="12" height="16" border="0" ></a>
+				</td>
+              </tr>
+
+
+			  <tr style="background='white'" onMouseOver="this.style.background='#F7F7F7'" onMouseOut="this.style.background='white'"> 
+                <td width="59" align="center" class="black_s">2004-03-19</td>
+                <td width="80" align="center" class="black_s">정회원Test02</td>
+                <td width="81" align="center" class="black_s">888-88-88888  </td>
+                <td width="83" align="right" class="black_s">5000원</td>
+                <td width="70" align="right" class="black_s">69원</td>
+                <td width="55" align="center" class="black_s">
+					<a href="javascript:viewTaxOfPubCode(2)" onFocus="this.blur()"><img src="http://www.trusbill.or.kr/image/ico_annex.gif" width="12" height="16" border="0" ></a>
+					<input type="hidden" name="pubCode" value="KF029999999997test05200502280106390">
+				</td>
+				<td width="55" align="center" class="black_s">
+					<a href="javascript:viewTradeSpecPubCode(2)" onFocus="this.blur()"><img src="http://www.trusbill.or.kr/image/ico_annex.gif" width="12" height="16" border="0" ></a>
+				</td>
+              </tr>
+
+
+			  <tr style="background='white'" onMouseOver="this.style.background='#F7F7F7'" onMouseOut="this.style.background='white'"> 
+                <td width="59" align="center" class="black_s">2004-02-27</td>
+                <td width="80" align="center" class="black_s">정회원Test02</td>
+                <td width="81" align="center" class="black_s">888-88-88888 </td>
+                <td width="83" align="right" class="black_s">5000원</td>
+                <td width="70" align="right" class="black_s">500원</td>
+                <td width="55" align="center" class="black_s">
+					<a href="javascript:viewTaxOfPubCode(3)" onFocus="this.blur()" ><img src="http://www.trusbill.or.kr/image/ico_annex.gif" width="12" height="16" border="0" ></a>
+					<input type="hidden" name="pubCode" value="KF029999999997test05200502280106382">
+				</td>
+				<td width="55" align="center" class="black_s">
+					<a href="javascript:viewTradeSpecPubCode(3)" onFocus="this.blur()"><img src="http://www.trusbill.or.kr/image/ico_annex.gif" width="12" height="16" border="0" ></a>
+				</td>
+              </tr>
+            </table>
+			
+          </td>
+        </tr>
+		<tr>
+			<td height="20"></td>
+		</tr>
+		<tr>
+		<td>
+		  이페이지는 샘플페이지로 이미지 클릭처리만 가능합니다.. <br>
+		  확인이미지를 클릭하면 TursBill시연서버의 샘플세금계산서의 세금계산서를 호출합니다<br><br><br>
+		  세금계산서를 호출하는 script부분을 참조하여 작업을 하시면 됩니다.
+		 </td>
+		</tr>
+	</table>
+</body>
+</html>
+
+        
